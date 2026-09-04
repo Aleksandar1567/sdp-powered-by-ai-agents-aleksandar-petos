@@ -1,0 +1,22 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Sphinx
+docs/_build/
+
+# Temp/editor files
+*.swp
+*.swo
+*.save
+*.tmp
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

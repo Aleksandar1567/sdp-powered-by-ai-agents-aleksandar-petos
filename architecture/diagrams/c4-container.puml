@@ -1,0 +1,24 @@
+@startuml c4-container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Container Diagram - Social Network (Modular Monolith)
+
+Person(user, "User", "Any user of the social network (Thomas, Alice, Charlie, etc.)")
+
+System_Boundary(socialNetwork, "Social Network") {
+  Container(posting, "Posting Module", "Python", "Creates and stores messages. Parses @mentions and URLs from message text.")
+  Container(socialGraph, "Social Graph Module", "Python", "Manages follow/unfollow relationships between users.")
+  Container(timeline, "Timeline/Feed Module", "Python", "Aggregates messages from followed users into a chronological feed.")
+  Container(messaging, "Messaging Module", "Python", "Handles private direct messages between two users.")
+}
+
+Rel(user, posting, "Posts messages, reads a user's wall")
+Rel(user, socialGraph, "Follows / unfollows users")
+Rel(user, timeline, "Views aggregated feed")
+Rel(user, messaging, "Sends and reads private messages")
+
+Rel(timeline, socialGraph, "Queries follow relationships", "in-process call")
+Rel(timeline, posting, "Fetches messages for followed users", "in-process call")
+
+SHOW_LEGEND()
+@enduml

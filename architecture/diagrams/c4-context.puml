@@ -1,0 +1,17 @@
+@startuml c4-context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title System Context Diagram - Social Network
+
+Person(alice, "Alice", "A user of the social network")
+Person(thomas, "Thomas", "A user of the social network")
+Person(charlie, "Charlie", "A user who follows other users")
+
+System(socialNetwork, "Social Network", "Allows users to post messages, follow other users, mention them, share links, and send direct messages")
+
+Rel(alice, socialNetwork, "Posts messages, reads timeline, sends direct messages")
+Rel(thomas, socialNetwork, "Posts messages, shares links")
+Rel(charlie, socialNetwork, "Follows users, views aggregated feed, mentions users")
+
+SHOW_LEGEND()
+@enduml

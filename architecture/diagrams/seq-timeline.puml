@@ -1,0 +1,17 @@
+@startuml seq-timeline
+title Runtime: Charlie views aggregated timeline
+
+actor Charlie
+participant "TimelineService" as TS
+participant "InMemoryFollowRepository" as FR
+participant "InMemoryPostRepository" as PR
+
+Charlie -> TS: timeline("charlie")
+TS -> FR: get_following("charlie")
+FR --> TS: ["thomas", "alice"]
+TS -> PR: find_by_author("thomas")
+PR --> TS: [Post(...), Post(...)]
+TS -> PR: find_by_author("alice")
+PR --> TS: [Post(...)]
+TS --> Charlie: [Post(alice,...), Post(thomas,...), Post(thomas,...)] sorted by timestamp desc
+@enduml
