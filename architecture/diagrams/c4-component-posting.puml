@@ -1,0 +1,23 @@
+@startuml c4-component-posting
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram - Posting Module
+
+Container_Boundary(posting, "Posting Module") {
+  Component(postService, "PostService", "Python class", "Orchestrates message creation. Delegates to parser and repository.")
+  Component(messageParser, "MessageParser", "Python class", "Extracts @mentions (regex) and URLs (regex) from raw message text.")
+  Component(postRepo, "InMemoryPostRepository", "Python class / dict", "Stores and retrieves Post objects keyed by username.")
+  Component(postModel, "Post", "Python dataclass", "Value object: id, author, text, timestamp, mentions[], links[].")
+}
+
+Container(timeline, "Timeline Module", "Python", "Fetches posts via PostRepository")
+Person(user, "User", "Calls PostService to post or read")
+
+Rel(user, postService, "post(author, text) / wall(username)")
+Rel(postService, messageParser, "parse(text) -> mentions, links")
+Rel(postService, postRepo, "save(post) / find_by_author(username)")
+Rel(postRepo, postModel, "creates / stores")
+Rel(timeline, postRepo, "find_by_author(username)")
+
+SHOW_LEGEND()
+@enduml

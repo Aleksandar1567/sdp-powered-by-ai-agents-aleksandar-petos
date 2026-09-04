@@ -1,0 +1,18 @@
+@startuml seq-direct-message
+title Runtime: Alice sends Thomas a private message
+
+actor Alice
+actor Thomas
+participant "DirectMessageService" as DMS
+participant "InMemoryDirectMessageRepository" as DMR
+
+Alice -> DMS: send("alice", "thomas", "Hey, private message!")
+DMS -> DMR: save(DirectMessage(sender="alice", recipient="thomas", text=...))
+DMR --> DMS: ok
+DMS --> Alice: DirectMessage(id=..., ...)
+
+Thomas -> DMS: conversation("thomas", "alice")
+DMS -> DMR: find_conversation("thomas", "alice")
+DMR --> DMS: [DirectMessage(sender="alice", ...)]
+DMS --> Thomas: [DirectMessage(...)]
+@enduml

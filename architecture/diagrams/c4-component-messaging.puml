@@ -1,0 +1,19 @@
+@startuml c4-component-messaging
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram - Messaging Module
+
+Container_Boundary(messaging, "Messaging Module") {
+  Component(dmService, "DirectMessageService", "Python class", "Sends a private message from one user to another and retrieves conversation history.")
+  Component(dmRepo, "InMemoryDirectMessageRepository", "Python class / dict", "Stores DirectMessage objects keyed by a canonical (sender, recipient) pair.")
+  Component(dmModel, "DirectMessage", "Python dataclass", "Value object: id, sender, recipient, text, timestamp.")
+}
+
+Person(user, "User", "Sends or reads private messages")
+
+Rel(user, dmService, "send(sender, recipient, text) / conversation(user_a, user_b)")
+Rel(dmService, dmRepo, "save(dm) / find_conversation(user_a, user_b)")
+Rel(dmRepo, dmModel, "creates / stores")
+
+SHOW_LEGEND()
+@enduml

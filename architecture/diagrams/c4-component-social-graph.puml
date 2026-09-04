@@ -1,0 +1,19 @@
+@startuml c4-component-social-graph
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram - Social Graph Module
+
+Container_Boundary(socialGraph, "Social Graph Module") {
+  Component(followService, "FollowService", "Python class", "Handles follow and unfollow operations.")
+  Component(followRepo, "InMemoryFollowRepository", "Python class / dict", "Stores follower/following sets keyed by username.")
+}
+
+Container(timeline, "Timeline Module", "Python", "Reads following list to build feed")
+Person(user, "User", "Calls FollowService to follow/unfollow")
+
+Rel(user, followService, "follow(follower, followee) / unfollow(...)")
+Rel(followService, followRepo, "add_follow / remove_follow / get_following")
+Rel(timeline, followRepo, "get_following(username)")
+
+SHOW_LEGEND()
+@enduml

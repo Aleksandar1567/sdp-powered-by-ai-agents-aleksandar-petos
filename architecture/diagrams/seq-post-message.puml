@@ -1,0 +1,15 @@
+@startuml seq-post-message
+title Runtime: Thomas posts a message with a mention and a link
+
+actor Thomas
+participant "PostService" as PS
+participant "MessageParser" as MP
+participant "InMemoryPostRepository" as PR
+
+Thomas -> PS: post("thomas", "Hey @alice see https://example.com")
+PS -> MP: parse("Hey @alice see https://example.com")
+MP --> PS: mentions=["alice"], links=["https://example.com"]
+PS -> PR: save(Post(author="thomas", text=..., mentions=["alice"], links=["https://example.com"]))
+PR --> PS: ok
+PS --> Thomas: Post(id=..., ...)
+@enduml

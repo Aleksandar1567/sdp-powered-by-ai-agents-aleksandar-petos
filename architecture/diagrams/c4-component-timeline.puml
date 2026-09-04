@@ -1,0 +1,19 @@
+@startuml c4-component-timeline
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram - Timeline/Feed Module
+
+Container_Boundary(timeline, "Timeline/Feed Module") {
+  Component(timelineService, "TimelineService", "Python class", "Aggregates posts from all users followed by the requesting user, sorted by timestamp descending.")
+}
+
+Container(socialGraph, "Social Graph Module", "Python", "Provides list of followees")
+Container(posting, "Posting Module", "Python", "Provides posts per user")
+Person(user, "User", "Requests aggregated feed")
+
+Rel(user, timelineService, "timeline(username)")
+Rel(timelineService, socialGraph, "get_following(username)", "in-process call")
+Rel(timelineService, posting, "find_by_author(followee) for each followee", "in-process call")
+
+SHOW_LEGEND()
+@enduml
