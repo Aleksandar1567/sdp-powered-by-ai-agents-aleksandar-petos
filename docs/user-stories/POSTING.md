@@ -212,37 +212,39 @@
 
 ## Infrastructure Sub-Stories
 
-### POSTING-INFRA-001.1: Module and package structure for the Posting bounded context
+### POSTING-INFRA-001.1: Docker image builds and pytest discovers tests for the Posting bounded context
 
-**AS A** developer setting up the project
-**I WANT** the `posting/` package to contain `models.py`, `parser.py`, `repository.py`, and `service.py` with correct `__init__.py` exports
-**SO THAT** the public API (`PostService`, `InMemoryPostRepository`, `Post`) is importable from `social_network.posting` without exposing internals
+**AS A** developer packaging the kata
+**I WANT** `docker build -t kata-tests .` to complete successfully, installing all dependencies and making the `src/` package importable inside the container
+**SO THAT** the Posting bounded context's tests can be discovered and executed by pytest without any host-side setup
 
-**Architecture Reference:** `04-solution-strategy.md §4.3` · `07-deployment-view.md §7.1`
+**Architecture Reference:** `07-deployment-view.md §7.1` · `Dockerfile` (repo root)
 
-#### POSTING-INFRA-001.1-S1: Package is importable as `social_network.posting`
-
-**GIVEN**
-- The repository is checked out and `pre-commit install` has been run
-
-**WHEN**
-- A Python interpreter runs `from social_network.posting import PostService, InMemoryPostRepository, Post`
-
-**THEN**
-- No `ImportError` or `ModuleNotFoundError` is raised
-- All three names are bound to their respective classes
-
-#### POSTING-INFRA-001.1-S2: Posting internals are not reachable from sibling modules
+#### POSTING-INFRA-001.1-S1: Docker image builds without error
 
 **GIVEN**
-- The `social_graph/`, `timeline/`, and `messaging/` packages exist
+- The repo is checked out with a valid `Dockerfile`, `requirements.txt`, `src/`, and `tests/`
 
 **WHEN**
-- `ruff` import-order checks run (or a manual import audit is performed)
+- `docker build -t kata-tests .` is run from the repo root
 
 **THEN**
-- No file under `social_graph/`, `timeline/`, or `messaging/` imports from `social_network.posting` internal modules (only the public API imports are allowed in `timeline/`)
-- Consistent with `10-quality-requirements.md §10.1` modularity criterion
+- The build exits with code `0`
+- All packages in `requirements.txt` (including `pytest`) are installed in the image
+- The `src/` source tree and `tests/` directory are copied into `/app` in the image
+
+#### POSTING-INFRA-001.1-S2: pytest discovers Posting tests inside the container
+
+**GIVEN**
+- The `kata-tests` image has been built successfully
+
+**WHEN**
+- `docker run --rm kata-tests pytest tests/ -v` is executed
+
+**THEN**
+- pytest collects at least the Posting-domain test files without a `ModuleNotFoundError`
+- `from social_network.posting import PostService, InMemoryPostRepository, Post` resolves correctly inside the container
+- Exit code is `0` when all tests pass
 
 ---
 
@@ -251,6 +253,8 @@
 **AS A** developer writing tests
 **I WANT** each test to construct its own `InMemoryPostRepository` and inject it into `PostService`
 **SO THAT** tests are fully isolated — no shared global state between test runs
+
+> **Data store sub-story note:** This story covers the data-store category for POSTING-STORY-001. State for the Posting bounded context is persisted exclusively in `InMemoryPostRepository` — a plain Python `dict[str, list[Post]]` held in process memory. There is no external database; isolation between tests is guaranteed by constructing a fresh instance per test via pytest's `function`-scoped fixture.
 
 **Architecture Reference:** `04-solution-strategy.md §4.1` · `09-architecture-decisions.md §ADR-002` · `11-risks-and-technical-debts.md §11.1 R-02`
 
@@ -323,8 +327,8 @@
 | POSTING-BE-001.3-S1 | `05-building-block-view.md §5.2` | POSTING-STORY-001 | `parse("Hey @alice and @bob!")` returns `mentions=["alice","bob"]`, `links=[]` |
 | POSTING-BE-001.3-S2 | `05-building-block-view.md §5.2` | POSTING-STORY-001 | `parse("Read this: https://example.com …")` returns correct `links` list |
 | POSTING-BE-001.3-S3 | `05-building-block-view.md §5.2` | POSTING-STORY-001 | Two calls with identical input produce identical output |
-| POSTING-INFRA-001.1-S1 | `04-solution-strategy.md §4.3`, `07-deployment-view.md §7.1` | POSTING-STORY-001 | `from social_network.posting import PostService` succeeds |
-| POSTING-INFRA-001.1-S2 | `10-quality-requirements.md §10.1` | POSTING-STORY-001 | No cross-context internal import found by lint/audit |
+| POSTING-INFRA-001.1-S1 | `Dockerfile` (repo root) · `07-deployment-view.md §7.1` | POSTING-STORY-001 | `docker build -t kata-tests .` exits `0`; `requirements.txt` packages installed; `src/` and `tests/` present in image |
+| POSTING-INFRA-001.1-S2 | `Dockerfile` (repo root) · `07-deployment-view.md §7.1` | POSTING-STORY-001 | `docker run --rm kata-tests pytest tests/ -v` collects Posting tests with no `ModuleNotFoundError`; exits `0` |
 | POSTING-INFRA-001.2-S1 | `09-architecture-decisions.md §ADR-002`, `11-risks-and-technical-debts.md §11.1 R-02` | POSTING-STORY-001 | Test isolation verified by running in reverse order |
 | POSTING-INFRA-001.2-S2 | `09-architecture-decisions.md §ADR-002` | POSTING-STORY-001 | Each test invocation of the `post_service` fixture gets a separate instance |
 | POSTING-INFRA-001.3-S1 | `08-cross-cutting-concepts.md §8.3` | POSTING-STORY-001 | `stdout` contains `author` and `post_id` after `post()` call in REPL; pytest produces no output on success |
