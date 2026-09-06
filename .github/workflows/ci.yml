@@ -2,9 +2,23 @@ name: CI
 
 on:
   push:
-    branches: [main, 'feature/**', 'fix/**']
+    branches:
+      - master
+      - "feature/**"
+      - "fix/**"
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "Dockerfile"
+      - ".github/workflows/ci.yml"
   pull_request:
-    branches: [main]
+    branches:
+      - master
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "Dockerfile"
+      - ".github/workflows/ci.yml"
 
 permissions:
   contents: read
@@ -13,7 +27,8 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout code
+        uses: actions/checkout@v5
 
       - name: Build Docker image
         run: docker build -t kata-tests .
