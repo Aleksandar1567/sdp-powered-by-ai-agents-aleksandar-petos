@@ -10,5 +10,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ src/
 COPY tests/ tests/
 
+# Make the src/ package tree importable (e.g. `social_network.posting`)
+ENV PYTHONPATH=/app/src
+
 # Run tests by default
 CMD ["pytest", "tests/", "-v", "--tb=short"]
