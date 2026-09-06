@@ -25,3 +25,17 @@ def test_posting_be_001_3_s2_given_urls_when_parsed_then_links_extracted():
     # THEN
     assert result.links == ["https://example.com", "http://foo.org"]
     assert result.mentions == []
+
+
+def test_posting_be_001_3_s3_given_same_input_when_parsed_twice_then_identical_output():
+    # POSTING-BE-001.3-S3
+    # GIVEN
+    text = "Hello @alice https://x.com"
+
+    # WHEN
+    result_one = MessageParser.parse(text)
+    result_two = MessageParser.parse(text)
+
+    # THEN
+    assert result_one.mentions == result_two.mentions
+    assert result_one.links == result_two.links
